@@ -22,16 +22,16 @@ type AchievementsByDateResp struct {
 
 type Achievement struct {
 	Date          string `json:"Date"`
-	HardcoreMode  string `json:"HardcoreMode"`
-	AchievementID string `json:"AchievementID"`
+	HardcoreMode  int    `json:"HardcoreMode"`
+	AchievementID int    `json:"AchievementID"`
 	Title         string `json:"Title"`
 	Description   string `json:"Description"`
 	BadgeName     string `json:"BadgeName"`
-	Points        string `json:"Points"`
+	Points        int    `json:"Points"`
 	Author        string `json:"Author"`
 	GameTitle     string `json:"GameTitle"`
 	GameIcon      string `json:"GameIcon"`
-	GameID        string `json:"GameID"`
+	GameID        int    `json:"GameID"`
 	ConsoleName   string `json:"ConsoleName"`
 	CumulScore    int    `json:"CumulScore"`
 	BadgeURL      string `json:"BadgeURL"`
