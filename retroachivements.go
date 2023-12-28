@@ -1,75 +1,54 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"time"
+
+	"github.com/carlmjohnson/requests"
 )
 
 const (
-	raAchievementsURL = "https://ra.hfc-essentials.com/user_by_range.php?user=%s&key=%s&member=%s&mode=json"
+	raAchievementsURL = "https://retroachievements.org/API/API_GetAchievementsEarnedBetween.php"
 )
-
-var (
-	achievementStartTime = time.Date(2010, 10, 2, 6, 0, 0, 0, time.UTC)
-)
-
-type AchievementsByDateResp struct {
-	AchievementList [][]Achievement `json:"achievement"`
-}
 
 type Achievement struct {
-	Date          string `json:"Date"`
-	HardcoreMode  int    `json:"HardcoreMode"`
-	AchievementID int    `json:"AchievementID"`
-	Title         string `json:"Title"`
-	Description   string `json:"Description"`
-	BadgeName     string `json:"BadgeName"`
-	Points        int    `json:"Points"`
-	Author        string `json:"Author"`
-	GameTitle     string `json:"GameTitle"`
-	GameIcon      string `json:"GameIcon"`
-	GameID        int    `json:"GameID"`
-	ConsoleName   string `json:"ConsoleName"`
-	CumulScore    int    `json:"CumulScore"`
-	BadgeURL      string `json:"BadgeURL"`
-	GameURL       string `json:"GameURL"`
+	HardcoreMode int    `json:"HardcoreMode"`
+	Title        string `json:"Title"`
+	Description  string `json:"Description"`
+	Points       int    `json:"Points"`
+	GameTitle    string `json:"GameTitle"`
+	ConsoleName  string `json:"ConsoleName"`
 }
 
 func formatAchievement(user string, a Achievement) string {
-	return fmt.Sprintf("%s's last retro achievement: %s (%s) - %s (%s)", user, a.Title, a.Description, a.GameTitle, a.ConsoleName)
+	return fmt.Sprintf("%s's last retro achievement: %s (%s) - %s (%s) - %d points", user, a.Title, a.Description, a.GameTitle, a.ConsoleName, a.Points)
 }
 
 func ra(apiUser, apiKey, user string) (string, error) {
-	url := fmt.Sprintf(raAchievementsURL, apiUser, apiKey, user)
+	t := fmt.Sprint(time.Now().Unix())
 
-	j := &AchievementsByDateResp{}
-
-	res, err := http.Get(url)
-	if err != nil {
-		return "", err
-	}
-
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-
-	err = json.Unmarshal(body, &j)
+	var j []Achievement
+	err := requests.
+		URL(raAchievementsURL).
+		Param("z", apiUser).
+		Param("y", apiKey).
+		Param("u", user).
+		Param("f", "0").
+		Param("t", t).
+		Param("mode", "json").
+		ToJSON(&j).
+		Fetch(context.Background())
 
 	if err != nil {
 		return "", err
 	}
 
-	if len(j.AchievementList[0]) == 0 {
+	if len(j) == 0 {
 		return fmt.Sprintf("No achievements found for user %s", user), nil
 	}
 
-	out := formatAchievement(user, j.AchievementList[0][len(j.AchievementList[0])-1])
+	out := formatAchievement(user, j[len(j)-1])
 
 	return out, nil
 }
