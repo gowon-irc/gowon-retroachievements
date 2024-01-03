@@ -22,7 +22,13 @@ type Achievement struct {
 }
 
 func formatAchievement(user string, a Achievement) string {
-	return fmt.Sprintf("%s's last retro achievement: %s (%s) - %s (%s) - %d points", user, a.Title, a.Description, a.GameTitle, a.ConsoleName, a.Points)
+	out := fmt.Sprintf("%s's last retro achievement: %s (%s) - %s (%s) - %d points", user, a.Title, a.Description, a.GameTitle, a.ConsoleName, a.Points)
+
+	if a.HardcoreMode == 1 {
+		out += " [Hardcore]"
+	}
+
+	return out
 }
 
 func ra(apiUser, apiKey, user string) (string, error) {
