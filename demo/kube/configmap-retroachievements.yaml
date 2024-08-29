@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: retroachievements-config
+data:
+  config.yaml: |
+    commands:
+      - command: ra
+        endpoint: http://retroachievements:8080

@@ -3,30 +3,25 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
+	"net/http"
+
 	"strings"
-	"syscall"
-	"time"
 
 	"github.com/boltdb/bolt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/gin-gonic/gin"
 	"github.com/gowon-irc/go-gowon"
 	"github.com/jessevdk/go-flags"
 )
 
 type Options struct {
-	Prefix   string `short:"P" long:"prefix" env:"GOWON_PREFIX" default:"." description:"prefix for commands"`
-	Broker   string `short:"b" long:"broker" env:"GOWON_BROKER" default:"localhost:1883" description:"mqtt broker"`
 	UserName string `short:"u" long:"username" env:"GOWON_RA_USERNAME" required:"true" description:"retroachievements username"`
 	APIKey   string `short:"k" long:"api-key" env:"GOWON_RA_API_KEY" required:"true" description:"retroachievements api key"`
 	KVPath   string `short:"K" long:"kv-path" env:"GOWON_RA_KV_PATH" default:"kv.db" description:"path to kv db"`
 }
 
 const (
-	moduleName               = "retroachievements"
-	mqttConnectRetryInternal = 5
-	mqttDisconnectTimeout    = 1000
+	moduleName = "retroachievements"
+	moduleHelp = "get players last achievements from retroachievements"
 )
 
 func setUser(kv *bolt.DB, nick, user []byte) error {
@@ -47,50 +42,32 @@ func getUser(kv *bolt.DB, nick []byte) (user []byte, err error) {
 	return user, err
 }
 
-func genRaHandler(apiUser, apiKey string, kv *bolt.DB) func(m gowon.Message) (string, error) {
-	return func(m gowon.Message) (string, error) {
-		fields := strings.Fields(m.Args)
+func raHandler(apiUser, apiKey string, kv *bolt.DB, m *gowon.Message) (string, error) {
+	fields := strings.Fields(m.Args)
 
-		if len(fields) >= 2 && fields[0] == "set" {
-			err := setUser(kv, []byte(m.Nick), []byte(fields[1]))
-			if err != nil {
-				return "", err
-			}
-			return fmt.Sprintf("set %s's user to %s", m.Nick, fields[1]), nil
-		}
-
-		if len(fields) >= 1 {
-			user := strings.Fields(m.Args)[0]
-			return ra(apiUser, apiKey, user)
-		}
-
-		user, err := getUser(kv, []byte(m.Nick))
+	if len(fields) >= 2 && fields[0] == "set" {
+		err := setUser(kv, []byte(m.Nick), []byte(fields[1]))
 		if err != nil {
 			return "", err
 		}
-
-		if len(user) > 0 {
-			return ra(apiUser, apiKey, string(user))
-		}
-
-		return "Error: username needed", nil
+		return fmt.Sprintf("set %s's user to %s", m.Nick, fields[1]), nil
 	}
-}
 
-func defaultPublishHandler(c mqtt.Client, msg mqtt.Message) {
-	log.Printf("unexpected message:  %s\n", msg)
-}
+	if len(fields) >= 1 {
+		user := strings.Fields(m.Args)[0]
+		return ra(apiUser, apiKey, user)
+	}
 
-func onConnectionLostHandler(c mqtt.Client, err error) {
-	log.Println("connection to broker lost")
-}
+	user, err := getUser(kv, []byte(m.Nick))
+	if err != nil {
+		return "", err
+	}
 
-func onRecconnectingHandler(c mqtt.Client, opts *mqtt.ClientOptions) {
-	log.Println("attempting to reconnect to broker")
-}
+	if len(user) > 0 {
+		return ra(apiUser, apiKey, string(user))
+	}
 
-func onConnectHandler(c mqtt.Client) {
-	log.Println("connected to broker")
+	return "Error: username needed", nil
 }
 
 func main() {
@@ -100,18 +77,6 @@ func main() {
 	if _, err := flags.Parse(&opts); err != nil {
 		log.Fatal(err)
 	}
-
-	mqttOpts := mqtt.NewClientOptions()
-	mqttOpts.AddBroker(fmt.Sprintf("tcp://%s", opts.Broker))
-	mqttOpts.SetClientID(fmt.Sprintf("gowon_%s", moduleName))
-	mqttOpts.SetConnectRetry(true)
-	mqttOpts.SetConnectRetryInterval(mqttConnectRetryInternal * time.Second)
-	mqttOpts.SetAutoReconnect(true)
-
-	mqttOpts.DefaultPublishHandler = defaultPublishHandler
-	mqttOpts.OnConnectionLost = onConnectionLostHandler
-	mqttOpts.OnReconnecting = onRecconnectingHandler
-	mqttOpts.OnConnect = onConnectHandler
 
 	kv, err := bolt.Open(opts.KVPath, 0666, nil)
 	if err != nil {
@@ -127,26 +92,34 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mr := gowon.NewMessageRouter()
+	r := gin.Default()
+	r.POST("/message", func(c *gin.Context) {
+		var m gowon.Message
 
-	mr.AddCommand("ra", genRaHandler(opts.UserName, opts.APIKey, kv))
-	mr.Subscribe(mqttOpts, moduleName)
+		if err := c.BindJSON(&m); err != nil {
+			log.Println("Error: unable to bind message to json", err)
+			return
+		}
 
-	log.Print("connecting to broker")
+		out, err := raHandler(opts.UserName, opts.APIKey, kv, &m)
+		if err != nil {
+			log.Println(err)
+			m.Msg = "{red}Error when looking up retroachievements data{clear}"
+			c.IndentedJSON(http.StatusInternalServerError, &m)
+		}
 
-	c := mqtt.NewClient(mqttOpts)
-	if token := c.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
+		m.Msg = out
+		c.IndentedJSON(http.StatusOK, &m)
+	})
+
+	r.GET("/help", func(c *gin.Context) {
+		c.IndentedJSON(http.StatusOK, &gowon.Message{
+			Module: moduleName,
+			Msg:    moduleHelp,
+		})
+	})
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal(err)
 	}
-
-	log.Print("connected to broker")
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	<-sigs
-
-	log.Println("signal caught, exiting")
-	c.Disconnect(mqttDisconnectTimeout)
-	log.Println("shutdown complete")
 }
