@@ -14,9 +14,8 @@ import (
 )
 
 type Options struct {
-	UserName string `short:"u" long:"username" env:"GOWON_RA_USERNAME" required:"true" description:"retroachievements username"`
-	APIKey   string `short:"k" long:"api-key" env:"GOWON_RA_API_KEY" required:"true" description:"retroachievements api key"`
-	KVPath   string `short:"K" long:"kv-path" env:"GOWON_RA_KV_PATH" default:"kv.db" description:"path to kv db"`
+	APIKey string `short:"k" long:"api-key" env:"GOWON_RA_API_KEY" required:"true" description:"retroachievements api key"`
+	KVPath string `short:"K" long:"kv-path" env:"GOWON_RA_KV_PATH" default:"kv.db" description:"path to kv db"`
 }
 
 const (
@@ -42,7 +41,7 @@ func getUser(kv *bolt.DB, nick []byte) (user []byte, err error) {
 	return user, err
 }
 
-func raHandler(apiUser, apiKey string, kv *bolt.DB, m *gowon.Message) (string, error) {
+func raHandler(apiKey string, kv *bolt.DB, m *gowon.Message) (string, error) {
 	fields := strings.Fields(m.Args)
 
 	if len(fields) >= 2 && fields[0] == "set" {
@@ -55,7 +54,7 @@ func raHandler(apiUser, apiKey string, kv *bolt.DB, m *gowon.Message) (string, e
 
 	if len(fields) >= 1 {
 		user := strings.Fields(m.Args)[0]
-		return ra(apiUser, apiKey, user)
+		return ra(apiKey, user)
 	}
 
 	user, err := getUser(kv, []byte(m.Nick))
@@ -64,7 +63,7 @@ func raHandler(apiUser, apiKey string, kv *bolt.DB, m *gowon.Message) (string, e
 	}
 
 	if len(user) > 0 {
-		return ra(apiUser, apiKey, string(user))
+		return ra(apiKey, string(user))
 	}
 
 	return "Error: username needed", nil
@@ -101,7 +100,7 @@ func main() {
 			return
 		}
 
-		out, err := raHandler(opts.UserName, opts.APIKey, kv, &m)
+		out, err := raHandler(opts.APIKey, kv, &m)
 		if err != nil {
 			log.Println(err)
 			m.Msg = "{red}Error when looking up retroachievements data{clear}"

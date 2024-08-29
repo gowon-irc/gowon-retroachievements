@@ -3,13 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/carlmjohnson/requests"
 )
 
 const (
-	raAchievementsURL = "https://retroachievements.org/API/API_GetAchievementsEarnedBetween.php"
+	raAchievementsURL = "https://retroachievements.org/API/API_GetUserRecentAchievements.php"
 )
 
 type Achievement struct {
@@ -31,17 +30,13 @@ func formatAchievement(user string, a Achievement) string {
 	return out
 }
 
-func ra(apiUser, apiKey, user string) (string, error) {
-	t := fmt.Sprint(time.Now().Unix())
-
+func ra(apiKey, user string) (string, error) {
 	var j []Achievement
 	err := requests.
 		URL(raAchievementsURL).
-		Param("z", apiUser).
 		Param("y", apiKey).
 		Param("u", user).
-		Param("f", "0").
-		Param("t", t).
+		Param("m", "131400").
 		Param("mode", "json").
 		ToJSON(&j).
 		Fetch(context.Background())
@@ -54,7 +49,7 @@ func ra(apiUser, apiKey, user string) (string, error) {
 		return fmt.Sprintf("No achievements found for user %s", user), nil
 	}
 
-	out := formatAchievement(user, j[len(j)-1])
+	out := formatAchievement(user, j[0])
 
 	return out, nil
 }
