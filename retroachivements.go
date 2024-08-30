@@ -1,10 +1,9 @@
 package main
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/carlmjohnson/requests"
+	"github.com/imroc/req/v3"
 )
 
 const (
@@ -30,16 +29,14 @@ func formatAchievement(user string, a Achievement) string {
 	return out
 }
 
-func ra(apiKey, user string) (string, error) {
+func raLastAchievement(client *req.Client, user string) (string, error) {
 	var j []Achievement
-	err := requests.
-		URL(raAchievementsURL).
-		Param("y", apiKey).
-		Param("u", user).
-		Param("m", "131400").
-		Param("mode", "json").
-		ToJSON(&j).
-		Fetch(context.Background())
+
+	_, err := client.R().
+		SetQueryParam("u", user).
+		SetQueryParam("m", "131400").
+		SetSuccessResult(&j).
+		Get(raAchievementsURL)
 
 	if err != nil {
 		return "", err

@@ -10,6 +10,7 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/gin-gonic/gin"
 	"github.com/gowon-irc/go-gowon"
+	"github.com/imroc/req/v3"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -41,32 +42,64 @@ func getUser(kv *bolt.DB, nick []byte) (user []byte, err error) {
 	return user, err
 }
 
-func raHandler(apiKey string, kv *bolt.DB, m *gowon.Message) (string, error) {
-	fields := strings.Fields(m.Args)
-
-	if len(fields) >= 2 && fields[0] == "set" {
-		err := setUser(kv, []byte(m.Nick), []byte(fields[1]))
-		if err != nil {
-			return "", err
-		}
-		return fmt.Sprintf("set %s's user to %s", m.Nick, fields[1]), nil
-	}
+func parseArgs(msg string) (command, user string) {
+	fields := strings.Fields(msg)
 
 	if len(fields) >= 1 {
-		user := strings.Fields(m.Args)[0]
-		return ra(apiKey, user)
+		command = fields[0]
 	}
 
-	user, err := getUser(kv, []byte(m.Nick))
+	if len(fields) >= 2 {
+		user = fields[1]
+	}
+
+	return command, user
+}
+
+func setUserHandler(kv *bolt.DB, nick, user string) (string, error) {
+	if user == "" {
+		return "Error: username needed", nil
+	}
+
+	err := setUser(kv, []byte(nick), []byte(user))
 	if err != nil {
 		return "", err
 	}
 
-	if len(user) > 0 {
-		return ra(apiKey, string(user))
+	return fmt.Sprintf("set %s's user to %s", nick, user), nil
+}
+
+type commandFunc func(*req.Client, string) (string, error)
+
+func CommandHandler(client *req.Client, kv *bolt.DB, nick, user string, f commandFunc) (string, error) {
+	if user != "" {
+		return f(client, user)
 	}
 
-	return "Error: username needed", nil
+	savedUser, err := getUser(kv, []byte(nick))
+	if err != nil {
+		return "", err
+	}
+
+	if len(savedUser) == 0 {
+		return "Error: username needed", nil
+	}
+
+	return f(client, string(savedUser))
+}
+
+func raHandler(client *req.Client, kv *bolt.DB, m *gowon.Message) (string, error) {
+
+	command, user := parseArgs(m.Args)
+
+	switch command {
+	case "s", "set":
+		return setUserHandler(kv, m.Nick, user)
+	case "a", "achievement":
+		return CommandHandler(client, kv, m.Nick, user, raLastAchievement)
+	}
+
+	return "one of [s]et or [a]chievements must be passed as a command", nil
 }
 
 func main() {
@@ -91,6 +124,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	httpClient := req.C().
+		SetCommonQueryParam("y", opts.APIKey)
+
 	r := gin.Default()
 	r.POST("/message", func(c *gin.Context) {
 		var m gowon.Message
@@ -100,7 +136,7 @@ func main() {
 			return
 		}
 
-		out, err := raHandler(opts.APIKey, kv, &m)
+		out, err := raHandler(httpClient, kv, &m)
 		if err != nil {
 			log.Println(err)
 			m.Msg = "{red}Error when looking up retroachievements data{clear}"
