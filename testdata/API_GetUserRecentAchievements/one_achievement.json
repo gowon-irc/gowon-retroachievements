@@ -1,0 +1,20 @@
+[
+    {
+        "Date": "2024-08-29 01:42:58",
+        "HardcoreMode": 1,
+        "AchievementID": 104299,
+        "Title": "title 1",
+        "Description": "description 1",
+        "BadgeName": "113808",
+        "Points": 5,
+        "TrueRatio": 11,
+        "Type": null,
+        "Author": "jos",
+        "GameTitle": "game 1",
+        "GameIcon": "/Images/060997.png",
+        "GameID": 9985,
+        "ConsoleName": "console 1",
+        "BadgeURL": "/Badge/113808.png",
+        "GameURL": "/game/9985"
+    }
+]
