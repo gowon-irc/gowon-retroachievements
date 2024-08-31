@@ -15,11 +15,13 @@ const (
 	raRecentGamesURL  = "https://retroachievements.org/API/API_GetUserRecentlyPlayedGames.php"
 	raUserSummaryURL  = "https://retroachievements.org/API/API_GetUserSummary.php"
 
-	achievementColour  = "cyan"
-	gameColour         = "magenta"
-	pointsColour       = "green"
-	hardcoreColour     = "yellow"
-	richPresenceColour = "yellow"
+	achievementColour   = "cyan"
+	gameColour          = "magenta"
+	pointsColour        = "green"
+	relaxedPointsColour = "magenta"
+	hardcoreColour      = "yellow"
+	richPresenceColour  = "yellow"
+	rankColour          = "yellow"
 )
 
 var (
@@ -140,7 +142,12 @@ type UserSummary struct {
 		Title      string `json:"Title"`
 		LastPlayed string `json:"LastPlayed"`
 	} `json:"RecentlyPlayed"`
-	RichPresenceMsg string `json:"RichPresenceMsg"`
+	RichPresenceMsg     string `json:"RichPresenceMsg"`
+	TotalPoints         int    `json:"TotalPoints"`
+	TotalTruePoints     int    `json:"TotalTruePoints"`
+	TotalSoftcorePoints int    `json:"TotalSoftcorePoints"`
+	Rank                int    `json:"Rank"`
+	TotalRanked         int    `json:"TotalRanked"`
 }
 
 func (us *UserSummary) IsOnline() bool {
@@ -194,6 +201,44 @@ func raCurrentStatus(client *req.Client, user string) (string, error) {
 	sb.WriteString(" | ")
 
 	w(j.RichPresenceMsg, richPresenceColour)
+
+	return sb.String(), nil
+}
+
+func raPoints(client *req.Client, user string) (string, error) {
+	var j UserSummary
+
+	_, err := client.R().
+		SetQueryParam("u", user).
+		SetSuccessResult(&j).
+		Get(raUserSummaryURL)
+
+	if err != nil {
+		return "", err
+	}
+
+	if j.ID == 0 {
+		return fmt.Sprintf("User %s not found", user), nil
+	}
+
+	var sb strings.Builder
+
+	w := func(in, colour string) {
+		s := colourString(in, colour)
+		sb.WriteString(s)
+	}
+
+	sb.WriteString(fmt.Sprintf("%s | ", user))
+
+	w(fmt.Sprintf("Points: %d (%d)", j.TotalPoints, j.TotalTruePoints), pointsColour)
+
+	sb.WriteString(" | ")
+
+	w(fmt.Sprintf("Relaxed: %d", j.TotalSoftcorePoints), relaxedPointsColour)
+
+	sb.WriteString(" | ")
+
+	w(fmt.Sprintf("Rank: %d/%d", j.Rank, j.TotalRanked), rankColour)
 
 	return sb.String(), nil
 }

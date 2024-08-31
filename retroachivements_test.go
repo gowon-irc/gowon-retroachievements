@@ -246,3 +246,35 @@ func TestRaCurrentStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestRaPoints(t *testing.T) {
+	cases := map[string]struct {
+		jsonfn   string
+		expected string
+		err      error
+	}{
+		"points": {
+			jsonfn:   "summary.json",
+			expected: "user | {green}Points: 509 (1084){clear} | {magenta}Relaxed: 2376{clear} | {yellow}Rank: 51006/70476{clear}",
+			err:      nil,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			json := openTestFile(t, "API_GetUserSummary", "summary.json")
+
+			client := req.C()
+			httpmock.ActivateNonDefault(client.GetClient())
+			httpmock.RegisterResponder("GET", raUserSummaryURL, func(request *http.Request) (*http.Response, error) {
+				resp := httpmock.NewBytesResponse(http.StatusOK, json)
+				return resp, nil
+			})
+
+			out, err := raPoints(client, "user")
+
+			assert.Equal(t, tc.expected, out)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
