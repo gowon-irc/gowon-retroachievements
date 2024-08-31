@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/imroc/req/v3"
 )
@@ -9,6 +10,10 @@ import (
 const (
 	raAchievementsURL = "https://retroachievements.org/API/API_GetUserRecentAchievements.php"
 )
+
+func colourString(in, colour string) string {
+	return fmt.Sprintf("{%s}%s{clear}", colour, in)
+}
 
 type Achievement struct {
 	HardcoreMode int    `json:"HardcoreMode"`
@@ -19,14 +24,29 @@ type Achievement struct {
 	ConsoleName  string `json:"ConsoleName"`
 }
 
-func formatAchievement(user string, a Achievement) string {
-	out := fmt.Sprintf("%s's last retro achievement: %s (%s) - %s (%s) - %d points", user, a.Title, a.Description, a.GameTitle, a.ConsoleName, a.Points)
+func formatAchievement(a Achievement) string {
+	var sb strings.Builder
 
-	if a.HardcoreMode == 1 {
-		out += " [Hardcore]"
+	w := func(in, colour string) {
+		s := colourString(in, colour)
+		sb.WriteString(s)
 	}
 
-	return out
+	w(fmt.Sprintf("%s (%s)", a.Title, strings.TrimRight(a.Description, ".")), "cyan")
+
+	sb.WriteString(" | ")
+
+	w(fmt.Sprintf("%s (%s)", a.GameTitle, a.ConsoleName), "magenta")
+
+	sb.WriteString(" | ")
+
+	w(fmt.Sprintf("%d points", a.Points), "green")
+
+	if a.HardcoreMode == 1 {
+		w(" [Hardcore]", "yellow")
+	}
+
+	return sb.String()
 }
 
 func raLastAchievement(client *req.Client, user string) (string, error) {
@@ -46,7 +66,8 @@ func raLastAchievement(client *req.Client, user string) (string, error) {
 		return fmt.Sprintf("No achievements found for user %s", user), nil
 	}
 
-	out := formatAchievement(user, j[0])
+	a := formatAchievement(j[0])
+	out := fmt.Sprintf("%s's newest retroachievement: %s", user, a)
 
 	return out, nil
 }

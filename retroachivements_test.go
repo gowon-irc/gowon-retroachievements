@@ -36,7 +36,7 @@ func TestFormatAchievement(t *testing.T) {
 				GameTitle:    "game",
 				ConsoleName:  "console",
 			},
-			expected: "user's last retro achievement: achievement (description) - game (console) - 100 points [Hardcore]",
+			expected: "{cyan}achievement (description){clear} | {magenta}game (console){clear} | {green}100 points{clear}{yellow} [Hardcore]{clear}",
 		},
 		"softcore": {
 			in: Achievement{
@@ -47,13 +47,13 @@ func TestFormatAchievement(t *testing.T) {
 				GameTitle:    "game",
 				ConsoleName:  "console",
 			},
-			expected: "user's last retro achievement: achievement (description) - game (console) - 100 points",
+			expected: "{cyan}achievement (description){clear} | {magenta}game (console){clear} | {green}100 points{clear}",
 		},
 	}
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			out := formatAchievement("user", tc.in)
+			out := formatAchievement(tc.in)
 
 			assert.Equal(t, tc.expected, out)
 		})
@@ -73,12 +73,12 @@ func TestRaLastAchievement(t *testing.T) {
 		},
 		"one achievement": {
 			jsonfn:   "one_achievement.json",
-			expected: "user's last retro achievement: title 1 (description 1) - game 1 (console 1) - 5 points [Hardcore]",
+			expected: "user's newest retroachievement: {cyan}title 1 (description 1){clear} | {magenta}game 1 (console 1){clear} | {green}5 points{clear}{yellow} [Hardcore]{clear}",
 			err:      nil,
 		},
 		"many achievements": {
 			jsonfn:   "many_achievements.json",
-			expected: "user's last retro achievement: title 1 (description 1) - game 1 (console 1) - 5 points [Hardcore]",
+			expected: "user's newest retroachievement: {cyan}title 1 (description 1){clear} | {magenta}game 1 (console 1){clear} | {green}5 points{clear}{yellow} [Hardcore]{clear}",
 			err:      nil,
 		},
 	}
