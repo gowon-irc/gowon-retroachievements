@@ -9,6 +9,7 @@ import (
 
 const (
 	raAchievementsURL = "https://retroachievements.org/API/API_GetUserRecentAchievements.php"
+	raRecentGamesURL  = "https://retroachievements.org/API/API_GetUserRecentlyPlayedGames.php"
 
 	achievementColour = "cyan"
 	gameColour        = "magenta"
@@ -18,6 +19,21 @@ const (
 
 func colourString(in, colour string) string {
 	return fmt.Sprintf("{%s}%s{clear}", colour, in)
+}
+
+func colourList(in []string) (out []string) {
+	out = []string{}
+
+	colours := []string{"green", "red", "blue", "orange", "magenta", "cyan", "yellow"}
+	cl := len(colours)
+
+	for n, i := range in {
+		c := colours[n%cl]
+		o := colourString(i, c)
+		out = append(out, o)
+	}
+
+	return out
 }
 
 type Achievement struct {
@@ -54,6 +70,10 @@ func formatAchievement(a Achievement) string {
 	return sb.String()
 }
 
+type Game struct {
+	Title string `json:"Title"`
+}
+
 func raNewestAchievement(client *req.Client, user string) (string, error) {
 	var j []Achievement
 
@@ -75,4 +95,31 @@ func raNewestAchievement(client *req.Client, user string) (string, error) {
 	out := fmt.Sprintf("%s's newest retroachievement: %s", user, a)
 
 	return out, nil
+}
+
+func raLastGames(client *req.Client, user string) (string, error) {
+	var j []Game
+
+	_, err := client.R().
+		SetQueryParam("u", user).
+		SetQueryParam("c", "10").
+		SetSuccessResult(&j).
+		Get(raRecentGamesURL)
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(j) == 0 {
+		return fmt.Sprintf("No played games found for user %s", user), nil
+	}
+
+	titles := []string{}
+	for _, g := range j {
+		titles = append(titles, g.Title)
+	}
+
+	cl := strings.Join(colourList(titles), ", ")
+
+	return fmt.Sprintf("%s's last played retro games: %s", user, cl), nil
 }

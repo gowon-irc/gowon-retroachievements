@@ -97,9 +97,11 @@ func raHandler(client *req.Client, kv *bolt.DB, m *gowon.Message) (string, error
 		return setUserHandler(kv, m.Nick, user)
 	case "a", "achievement":
 		return CommandHandler(client, kv, m.Nick, user, raNewestAchievement)
+	case "l", "last":
+		return CommandHandler(client, kv, m.Nick, user, raLastGames)
 	}
 
-	return "one of [s]et or [a]chievement must be passed as a command", nil
+	return "one of [s]et, [a]chievement or [l]ast must be passed as a command", nil
 }
 
 func main() {

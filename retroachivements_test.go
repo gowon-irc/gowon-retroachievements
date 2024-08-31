@@ -22,6 +22,34 @@ func openTestFile(t *testing.T, endpoint, filename string) []byte {
 	return out
 }
 
+func TestColourList(t *testing.T) {
+	cases := map[string]struct {
+		in       []string
+		expected []string
+	}{
+		"empty list": {
+			in:       []string{},
+			expected: []string{},
+		},
+		"single item": {
+			in:       []string{"a"},
+			expected: []string{"{green}a{clear}"},
+		},
+		"two items": {
+			in:       []string{"a", "b"},
+			expected: []string{"{green}a{clear}", "{red}b{clear}"},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			out := colourList(tc.in)
+
+			assert.Equal(t, tc.expected, out)
+		})
+	}
+}
+
 func TestFormatAchievement(t *testing.T) {
 	cases := map[string]struct {
 		in       Achievement
@@ -95,6 +123,48 @@ func TestRaNewestAchievement(t *testing.T) {
 			})
 
 			out, err := raNewestAchievement(client, "user")
+
+			assert.Equal(t, tc.expected, out)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestRaRecentGames(t *testing.T) {
+	cases := map[string]struct {
+		jsonfn   string
+		expected string
+		err      error
+	}{
+		"no games": {
+			jsonfn:   "no_games.json",
+			expected: "No played games found for user user",
+			err:      nil,
+		},
+		"one game": {
+			jsonfn:   "one_game.json",
+			expected: "user's last played retro games: {green}Game 1{clear}",
+			err:      nil,
+		},
+		"many games": {
+			jsonfn:   "many_games.json",
+			expected: "user's last played retro games: {green}Game 1{clear}, {red}Game 2{clear}, {blue}Game 3{clear}",
+			err:      nil,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			json := openTestFile(t, "API_GetUserRecentlyPlayedGames", tc.jsonfn)
+
+			client := req.C()
+			httpmock.ActivateNonDefault(client.GetClient())
+			httpmock.RegisterResponder("GET", raRecentGamesURL, func(request *http.Request) (*http.Response, error) {
+				resp := httpmock.NewBytesResponse(http.StatusOK, json)
+				return resp, nil
+			})
+
+			out, err := raLastGames(client, "user")
 
 			assert.Equal(t, tc.expected, out)
 			assert.ErrorIs(t, tc.err, err)

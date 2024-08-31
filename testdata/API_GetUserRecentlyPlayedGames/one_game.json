@@ -1,0 +1,20 @@
+[
+    {
+        "GameID": 9985,
+        "ConsoleID": 18,
+        "ConsoleName": "Console 1",
+        "Title": "Game 1",
+        "ImageIcon": "/Images/060997.png",
+        "ImageTitle": "/Images/032529.png",
+        "ImageIngame": "/Images/032530.png",
+        "ImageBoxArt": "/Images/032533.png",
+        "LastPlayed": "2024-08-29 10:08:19",
+        "AchievementsTotal": 46,
+        "NumPossibleAchievements": 46,
+        "PossibleScore": 460,
+        "NumAchieved": 9,
+        "ScoreAchieved": 48,
+        "NumAchievedHardcore": 9,
+        "ScoreAchievedHardcore": 48
+    }
+]
