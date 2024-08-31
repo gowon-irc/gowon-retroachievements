@@ -60,7 +60,7 @@ func TestFormatAchievement(t *testing.T) {
 	}
 }
 
-func TestRaLastAchievement(t *testing.T) {
+func TestRaNewestAchievement(t *testing.T) {
 	cases := map[string]struct {
 		jsonfn   string
 		expected string
@@ -94,7 +94,7 @@ func TestRaLastAchievement(t *testing.T) {
 				return resp, nil
 			})
 
-			out, err := raLastAchievement(client, "user")
+			out, err := raNewestAchievement(client, "user")
 
 			assert.Equal(t, tc.expected, out)
 			assert.ErrorIs(t, tc.err, err)

@@ -54,7 +54,7 @@ func formatAchievement(a Achievement) string {
 	return sb.String()
 }
 
-func raLastAchievement(client *req.Client, user string) (string, error) {
+func raNewestAchievement(client *req.Client, user string) (string, error) {
 	var j []Achievement
 
 	_, err := client.R().
