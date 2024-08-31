@@ -230,7 +230,7 @@ func TestRaCurrentStatus(t *testing.T) {
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			now = func() time.Time { n, _ := time.Parse(timeDateFormat, tc.now); return n }
-			json := openTestFile(t, "API_GetUserSummary", "summary.json")
+			json := openTestFile(t, "API_GetUserSummary", tc.jsonfn)
 
 			client := req.C()
 			httpmock.ActivateNonDefault(client.GetClient())
@@ -262,7 +262,7 @@ func TestRaPoints(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			json := openTestFile(t, "API_GetUserSummary", "summary.json")
+			json := openTestFile(t, "API_GetUserSummary", tc.jsonfn)
 
 			client := req.C()
 			httpmock.ActivateNonDefault(client.GetClient())
@@ -272,6 +272,100 @@ func TestRaPoints(t *testing.T) {
 			})
 
 			out, err := raPoints(client, "user")
+
+			assert.Equal(t, tc.expected, out)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestRaAwards(t *testing.T) {
+	cases := map[string]struct {
+		jsonfn   string
+		expected string
+		err      error
+	}{
+		"awards": {
+			jsonfn:   "awards.json",
+			expected: "user | {red}Beaten: 1 (Relaxed: 5){clear} | {cyan}Completed: 3{clear} | {yellow}Mastered: 0{clear}",
+			err:      nil,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			json := openTestFile(t, "API_GetUserAwards", tc.jsonfn)
+
+			client := req.C()
+			httpmock.ActivateNonDefault(client.GetClient())
+			httpmock.RegisterResponder("GET", raAwardsURL, func(request *http.Request) (*http.Response, error) {
+				resp := httpmock.NewBytesResponse(http.StatusOK, json)
+				return resp, nil
+			})
+
+			out, err := raAwards(client, "user")
+
+			assert.Equal(t, tc.expected, out)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestGameProgressPointsAwarded(t *testing.T) {
+	cases := map[string]struct {
+		jsonfn   string
+		expected string
+	}{
+		"points": {
+			jsonfn:   "progress.json",
+			expected: "419/1369",
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			j := openTestFile(t, "API_GetGameInfoAndUserProgress", tc.jsonfn)
+			gp := GameProgress{}
+			err := json.Unmarshal(j, &gp)
+			assert.Nil(t, err)
+
+			assert.Equal(t, tc.expected, gp.PointsAwarded())
+		})
+	}
+}
+
+func TestRaGameProgress(t *testing.T) {
+	cases := map[string]struct {
+		jsonfn   string
+		expected string
+		err      error
+	}{
+		"progress": {
+			jsonfn:   "progress.json",
+			expected: "user | {magenta}~Hack~ Pokemon Radical Red (Game Boy Advance){clear} | {blue}Completion: 0.64% (Relaxed: 33.12%){clear} | {cyan}Achievements: 1/157 (Relaxed: 52){clear} | {green}Points: 419/1369{clear} | {yellow}Completed{clear}",
+			err:      nil,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			aJson := openTestFile(t, "API_GetUserRecentAchievements", "many_achievements.json")
+			gpJson := openTestFile(t, "API_GetGameInfoAndUserProgress", tc.jsonfn)
+
+			client := req.C()
+			httpmock.ActivateNonDefault(client.GetClient())
+
+			httpmock.RegisterResponder("GET", raAchievementsURL, func(request *http.Request) (*http.Response, error) {
+				resp := httpmock.NewBytesResponse(http.StatusOK, aJson)
+				return resp, nil
+			})
+
+			httpmock.RegisterResponder("GET", raGameProgressURL, func(request *http.Request) (*http.Response, error) {
+				resp := httpmock.NewBytesResponse(http.StatusOK, gpJson)
+				return resp, nil
+			})
+
+			out, err := raGameProgress(client, "user")
 
 			assert.Equal(t, tc.expected, out)
 			assert.ErrorIs(t, tc.err, err)

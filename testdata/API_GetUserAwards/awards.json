@@ -1,0 +1,120 @@
+{
+  "TotalAwardsCount": 9,
+  "HiddenAwardsCount": 0,
+  "MasteryAwardsCount": 0,
+  "CompletionAwardsCount": 3,
+  "BeatenHardcoreAwardsCount": 1,
+  "BeatenSoftcoreAwardsCount": 5,
+  "EventAwardsCount": 0,
+  "SiteAwardsCount": 0,
+  "VisibleUserAwards": [
+    {
+      "AwardedAt": "2021-11-13T01:31:30+00:00",
+      "AwardType": "Game Beaten",
+      "AwardData": 555,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 0,
+      "Title": "Shin Kidou Senki Gundam W: Endless Duel",
+      "ConsoleID": 3,
+      "ConsoleName": "SNES/Super Famicom",
+      "Flags": null,
+      "ImageIcon": "/Images/051792.png"
+    },
+    {
+      "AwardedAt": "2022-10-23T04:09:38+00:00",
+      "AwardType": "Mastery/Completion",
+      "AwardData": 17361,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 0,
+      "Title": "~Hack~ Pokemon Radical Red",
+      "ConsoleID": 5,
+      "ConsoleName": "Game Boy Advance",
+      "Flags": 0,
+      "ImageIcon": "/Images/078141.png"
+    },
+    {
+      "AwardedAt": "2023-04-10T01:18:00+00:00",
+      "AwardType": "Game Beaten",
+      "AwardData": 12747,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 0,
+      "Title": "Phoenix Wright: Ace Attorney",
+      "ConsoleID": 18,
+      "ConsoleName": "Nintendo DS",
+      "Flags": 0,
+      "ImageIcon": "/Images/060426.png"
+    },
+    {
+      "AwardedAt": "2023-04-16T01:40:38+00:00",
+      "AwardType": "Game Beaten",
+      "AwardData": 9537,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 0,
+      "Title": "Phoenix Wright: Ace Attorney - Justice for All",
+      "ConsoleID": 18,
+      "ConsoleName": "Nintendo DS",
+      "Flags": 0,
+      "ImageIcon": "/Images/086532.png"
+    },
+    {
+      "AwardedAt": "2023-05-06T04:48:40+00:00",
+      "AwardType": "Game Beaten",
+      "AwardData": 1446,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 0,
+      "Title": "Super Mario Bros.",
+      "ConsoleID": 7,
+      "ConsoleName": "NES/Famicom",
+      "Flags": 0,
+      "ImageIcon": "/Images/036035.png"
+    },
+    {
+      "AwardedAt": "2023-09-25T23:49:33+00:00",
+      "AwardType": "Game Beaten",
+      "AwardData": 21360,
+      "AwardDataExtra": 1,
+      "DisplayOrder": 0,
+      "Title": "~Hack~ Pokemon Emerald Rogue",
+      "ConsoleID": 5,
+      "ConsoleName": "Game Boy Advance",
+      "Flags": 0,
+      "ImageIcon": "/Images/099244.png"
+    },
+    {
+      "AwardedAt": "2023-04-10T01:18:00+00:00",
+      "AwardType": "Mastery/Completion",
+      "AwardData": 12747,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 1,
+      "Title": "Phoenix Wright: Ace Attorney",
+      "ConsoleID": 18,
+      "ConsoleName": "Nintendo DS",
+      "Flags": 0,
+      "ImageIcon": "/Images/060426.png"
+    },
+    {
+      "AwardedAt": "2023-04-16T01:55:03+00:00",
+      "AwardType": "Mastery/Completion",
+      "AwardData": 9537,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 2,
+      "Title": "Phoenix Wright: Ace Attorney - Justice for All",
+      "ConsoleID": 18,
+      "ConsoleName": "Nintendo DS",
+      "Flags": 0,
+      "ImageIcon": "/Images/086532.png"
+    },
+    {
+      "AwardedAt": "2022-10-02T02:07:56+00:00",
+      "AwardType": "Game Beaten",
+      "AwardData": 17361,
+      "AwardDataExtra": 0,
+      "DisplayOrder": 3,
+      "Title": "~Hack~ Pokemon Radical Red",
+      "ConsoleID": 5,
+      "ConsoleName": "Game Boy Advance",
+      "Flags": 0,
+      "ImageIcon": "/Images/078141.png"
+    }
+  ]
+}
