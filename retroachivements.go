@@ -3,18 +3,27 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/imroc/req/v3"
 )
 
 const (
+	timeDateFormat = "2006-01-02 15:04:05"
+
 	raAchievementsURL = "https://retroachievements.org/API/API_GetUserRecentAchievements.php"
 	raRecentGamesURL  = "https://retroachievements.org/API/API_GetUserRecentlyPlayedGames.php"
+	raUserSummaryURL  = "https://retroachievements.org/API/API_GetUserSummary.php"
 
-	achievementColour = "cyan"
-	gameColour        = "magenta"
-	pointsColour      = "green"
-	hardcoreColour    = "yellow"
+	achievementColour  = "cyan"
+	gameColour         = "magenta"
+	pointsColour       = "green"
+	hardcoreColour     = "yellow"
+	richPresenceColour = "yellow"
+)
+
+var (
+	now = time.Now
 )
 
 func colourString(in, colour string) string {
@@ -70,10 +79,6 @@ func formatAchievement(a Achievement) string {
 	return sb.String()
 }
 
-type Game struct {
-	Title string `json:"Title"`
-}
-
 func raNewestAchievement(client *req.Client, user string) (string, error) {
 	var j []Achievement
 
@@ -95,6 +100,10 @@ func raNewestAchievement(client *req.Client, user string) (string, error) {
 	out := fmt.Sprintf("%s's newest retroachievement: %s", user, a)
 
 	return out, nil
+}
+
+type Game struct {
+	Title string `json:"Title"`
 }
 
 func raLastGames(client *req.Client, user string) (string, error) {
@@ -122,4 +131,69 @@ func raLastGames(client *req.Client, user string) (string, error) {
 	cl := strings.Join(colourList(titles), ", ")
 
 	return fmt.Sprintf("%s's last played retro games: %s", user, cl), nil
+}
+
+type UserSummary struct {
+	ID             int    `json:"ID"`
+	Status         string `json:"Status"`
+	RecentlyPlayed []struct {
+		Title      string `json:"Title"`
+		LastPlayed string `json:"LastPlayed"`
+	} `json:"RecentlyPlayed"`
+	RichPresenceMsg string `json:"RichPresenceMsg"`
+}
+
+func (us *UserSummary) IsOnline() bool {
+	if len(us.RecentlyPlayed) == 0 {
+		return false
+	}
+
+	t, _ := time.Parse(timeDateFormat, us.RecentlyPlayed[0].LastPlayed)
+
+	return now().Unix() < t.Unix()+180
+}
+
+func raCurrentStatus(client *req.Client, user string) (string, error) {
+	var j UserSummary
+
+	_, err := client.R().
+		SetQueryParam("u", user).
+		SetQueryParam("g", "1").
+		SetQueryParam("a", "1").
+		SetSuccessResult(&j).
+		Get(raUserSummaryURL)
+
+	if err != nil {
+		return "", err
+	}
+
+	if j.ID == 0 {
+		return fmt.Sprintf("User %s not found", user), nil
+	}
+
+	var sb strings.Builder
+
+	w := func(in, colour string) {
+		s := colourString(in, colour)
+		sb.WriteString(s)
+	}
+
+	sb.WriteString(fmt.Sprintf("%s | ", user))
+
+	if !j.IsOnline() {
+		w("Offline", "red")
+		return sb.String(), nil
+	}
+
+	w("Online", "green")
+
+	sb.WriteString(" | ")
+
+	w(j.RecentlyPlayed[0].Title, gameColour)
+
+	sb.WriteString(" | ")
+
+	w(j.RichPresenceMsg, richPresenceColour)
+
+	return sb.String(), nil
 }

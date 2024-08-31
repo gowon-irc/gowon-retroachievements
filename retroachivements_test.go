@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/imroc/req/v3"
 	"github.com/jarcoal/httpmock"
@@ -165,6 +167,79 @@ func TestRaRecentGames(t *testing.T) {
 			})
 
 			out, err := raLastGames(client, "user")
+
+			assert.Equal(t, tc.expected, out)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestUserSummaryIsOnline(t *testing.T) {
+	cases := map[string]struct {
+		jsonfn   string
+		now      string
+		expected bool
+	}{
+		"online": {
+			jsonfn:   "summary.json",
+			now:      "2024-08-31 17:01:00",
+			expected: true,
+		},
+		"offline": {
+			jsonfn:   "summary.json",
+			now:      "2024-08-31 17:04:00",
+			expected: false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			now = func() time.Time { n, _ := time.Parse(timeDateFormat, tc.now); return n }
+
+			j := openTestFile(t, "API_GetUserSummary", "summary.json")
+			us := UserSummary{}
+			err := json.Unmarshal(j, &us)
+			assert.Nil(t, err)
+
+			assert.Equal(t, tc.expected, us.IsOnline())
+		})
+	}
+}
+
+func TestRaCurrentStatus(t *testing.T) {
+	cases := map[string]struct {
+		jsonfn   string
+		now      string
+		expected string
+		err      error
+	}{
+		"online": {
+			jsonfn:   "summary.json",
+			now:      "2024-08-31 17:01:00",
+			expected: "user | {green}Online{clear} | {magenta}game 1{clear} | {yellow}Titlescreen{clear}",
+			err:      nil,
+		},
+		"offline": {
+			jsonfn:   "summary.json",
+			now:      "2024-08-31 17:04:00",
+			expected: "user | {red}Offline{clear}",
+			err:      nil,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			now = func() time.Time { n, _ := time.Parse(timeDateFormat, tc.now); return n }
+			json := openTestFile(t, "API_GetUserSummary", "summary.json")
+
+			client := req.C()
+			httpmock.ActivateNonDefault(client.GetClient())
+			httpmock.RegisterResponder("GET", raUserSummaryURL, func(request *http.Request) (*http.Response, error) {
+				resp := httpmock.NewBytesResponse(http.StatusOK, json)
+				return resp, nil
+			})
+
+			out, err := raCurrentStatus(client, "user")
 
 			assert.Equal(t, tc.expected, out)
 			assert.ErrorIs(t, tc.err, err)

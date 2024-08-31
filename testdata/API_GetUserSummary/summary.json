@@ -1,0 +1,88 @@
+{
+    "User": "sharktamer",
+    "MemberSince": "2020-02-25 00:37:11",
+    "LastActivity": {
+        "ID": 0,
+        "timestamp": null,
+        "lastupdate": null,
+        "activitytype": null,
+        "User": "sharktamer",
+        "data": null,
+        "data2": null
+    },
+    "RichPresenceMsg": "Titlescreen",
+    "LastGameID": 1995,
+    "ContribCount": 0,
+    "ContribYield": 0,
+    "TotalPoints": 509,
+    "TotalSoftcorePoints": 2376,
+    "TotalTruePoints": 1084,
+    "Permissions": 1,
+    "Untracked": 0,
+    "ID": 119117,
+    "UserWallActive": 1,
+    "Motto": "",
+    "Rank": 51006,
+    "RecentlyPlayedCount": 1,
+    "RecentlyPlayed": [
+        {
+            "GameID": 1995,
+            "ConsoleID": 7,
+            "ConsoleName": "console 1",
+            "Title": "game 1",
+            "ImageIcon": "/Images/047650.png",
+            "ImageTitle": "/Images/079347.png",
+            "ImageIngame": "/Images/000743.png",
+            "ImageBoxArt": "/Images/013091.png",
+            "LastPlayed": "2024-08-31 17:00:00",
+            "AchievementsTotal": 52
+        }
+    ],
+    "Awarded": {
+        "1995": {
+            "NumPossibleAchievements": 52,
+            "PossibleScore": 518,
+            "NumAchieved": 9,
+            "ScoreAchieved": 46,
+            "NumAchievedHardcore": 9,
+            "ScoreAchievedHardcore": 46
+        }
+    },
+    "RecentAchievements": {
+        "1995": {
+            "4279": {
+                "ID": 4279,
+                "GameID": 1995,
+                "GameTitle": "game 1",
+                "Title": "achievement 1",
+                "Description": "desc 1",
+                "Points": 2,
+                "Type": null,
+                "BadgeName": "143650",
+                "IsAwarded": "1",
+                "DateAwarded": "2024-08-25 01:19:29",
+                "HardcoreAchieved": 1
+            }
+        }
+    },
+    "LastGame": {
+        "ID": 1995,
+        "Title": "title 1",
+        "ConsoleID": 7,
+        "ConsoleName": "console 1",
+        "ForumTopicID": 369,
+        "Flags": 0,
+        "ImageIcon": "/Images/047650.png",
+        "ImageTitle": "/Images/079347.png",
+        "ImageIngame": "/Images/000743.png",
+        "ImageBoxArt": "/Images/013091.png",
+        "Publisher": "Nintendo",
+        "Developer": "",
+        "Genre": "2D Platforming",
+        "Released": "October 23, 1988",
+        "IsFinal": 0
+    },
+    "UserPic": "/UserPic/sharktamer.png",
+    "TotalRanked": 70476,
+    "Status": "Offline"
+}
