@@ -9,6 +9,11 @@ import (
 
 const (
 	raAchievementsURL = "https://retroachievements.org/API/API_GetUserRecentAchievements.php"
+
+	achievementColour = "cyan"
+	gameColour        = "magenta"
+	pointsColour      = "green"
+	hardcoreColour    = "yellow"
 )
 
 func colourString(in, colour string) string {
@@ -32,18 +37,18 @@ func formatAchievement(a Achievement) string {
 		sb.WriteString(s)
 	}
 
-	w(fmt.Sprintf("%s (%s)", a.Title, strings.TrimRight(a.Description, ".")), "cyan")
+	w(fmt.Sprintf("%s (%s)", a.Title, strings.TrimRight(a.Description, ".")), achievementColour)
 
 	sb.WriteString(" | ")
 
-	w(fmt.Sprintf("%s (%s)", a.GameTitle, a.ConsoleName), "magenta")
+	w(fmt.Sprintf("%s (%s)", a.GameTitle, a.ConsoleName), gameColour)
 
 	sb.WriteString(" | ")
 
-	w(fmt.Sprintf("%d points", a.Points), "green")
+	w(fmt.Sprintf("%d points", a.Points), pointsColour)
 
 	if a.HardcoreMode == 1 {
-		w(" [Hardcore]", "yellow")
+		w(" [Hardcore]", hardcoreColour)
 	}
 
 	return sb.String()
