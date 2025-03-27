@@ -98,7 +98,7 @@ func TestRaNewestAchievement(t *testing.T) {
 	}{
 		"no achievements": {
 			jsonfn:   "no_achievements.json",
-			expected: "No achievements found for user user",
+			expected: "No recent achievements found for user user",
 			err:      nil,
 		},
 		"one achievement": {

@@ -96,7 +96,7 @@ func raNewestAchievement(client *req.Client, user string) (string, error) {
 
 	_, err := client.R().
 		SetQueryParam("u", user).
-		SetQueryParam("m", "131400").
+		SetQueryParam("m", "43200").
 		SetSuccessResult(&j).
 		Get(raAchievementsURL)
 
@@ -105,7 +105,7 @@ func raNewestAchievement(client *req.Client, user string) (string, error) {
 	}
 
 	if len(j) == 0 {
-		return fmt.Sprintf("No achievements found for user %s", user), nil
+		return fmt.Sprintf("No recent achievements found for user %s", user), nil
 	}
 
 	a := formatAchievement(j[0])
@@ -330,7 +330,7 @@ func raGameProgress(client *req.Client, user string) (string, error) {
 
 	_, err := client.R().
 		SetQueryParam("u", user).
-		SetQueryParam("m", "131400").
+		SetQueryParam("m", "43200").
 		SetSuccessResult(&aj).
 		Get(raAchievementsURL)
 
@@ -339,7 +339,7 @@ func raGameProgress(client *req.Client, user string) (string, error) {
 	}
 
 	if len(aj) == 0 {
-		return fmt.Sprintf("No played games found for user %s", user), nil
+		return fmt.Sprintf("No recent played games found for user %s", user), nil
 	}
 
 	gameID := strconv.Itoa(aj[0].GameID)
