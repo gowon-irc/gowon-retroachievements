@@ -397,7 +397,7 @@ func raGameProgress(client *req.Client, user string) (string, error) {
 	if gj.HighestAward != "" {
 		awards := map[string]string{
 			"beaten-softcore": "Beaten",
-			"beaten-hardcore": "Beaten [Hardocre]",
+			"beaten-hardcore": "Beaten [Hardcore]",
 			"completed":       "Completed",
 			"mastered":        "Mastered",
 		}
