@@ -3,7 +3,7 @@ COPY . /src
 WORKDIR /src
 RUN go build -o gowon-retroachievements
 
-FROM alpine:3.14.2
+FROM alpine:3.22.0
 RUN mkdir /data
 ENV GOWON_RA_KV_PATH /data/kv.db
 WORKDIR /app
