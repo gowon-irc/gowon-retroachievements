@@ -2,7 +2,7 @@ module github.com/gowon-irc/gowon-retroachievements
 
 go 1.22
 
-toolchain go1.23.0
+toolchain go1.24.4
 
 require (
 	github.com/boltdb/bolt v1.3.1
