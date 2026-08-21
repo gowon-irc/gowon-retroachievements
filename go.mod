@@ -11,7 +11,7 @@ require (
 	github.com/imroc/req/v3 v3.43.7
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.12.1
 )
 
 require (
@@ -52,6 +52,7 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	go.uber.org/mock v0.4.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
